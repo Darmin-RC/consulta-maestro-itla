@@ -45,19 +45,28 @@ export const createSeccion = async (req, res) => {
 
 export const updateSeccion = async (req, res) => {
     const { id } = req.params;
-    const { materiaId, estudianteId, modalidad, numeroSeccion } = req.body; // Obtener los nuevos valores del cuerpo de la solicitud
+    const { materiaId, estudianteId, modalidad, numeroSeccion } = req.body;
+
+    if (!materiaId || !estudianteId || !modalidad || !numeroSeccion) {
+        return res.status(400).json({ message: 'Faltan campos requeridos' });
+    }
 
     try {
-        const [result] = await pool.query(
-            'UPDATE secciones_estudiantes SET MateriaID = ?, EstudianteID = ?, Modalidad = ?, NumeroSeccion = ? WHERE SeccionID = ?', 
-            [materiaId, estudianteId, modalidad, numeroSeccion, id] // Incluir el id al final
-        );
-
-        if (result.affectedRows === 0) {
+        const [existing] = await pool.query('SELECT * FROM secciones_estudiantes WHERE SeccionID = ?', [id]);
+        if (existing.length === 0) {
             return res.status(404).json({ message: 'Sección no encontrada' });
         }
 
-        res.json({ id, materiaId, estudianteId, modalidad, numeroSeccion }); // Enviar la respuesta con los datos actualizados
+        const [result] = await pool.query(
+            'UPDATE secciones_estudiantes SET MateriaID = ?, EstudianteID = ?, Modalidad = ?, NumeroSeccion = ? WHERE SeccionID = ?',
+            [materiaId, estudianteId, modalidad, numeroSeccion, id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Sección no encontrada o datos no cambiaron' });
+        }
+
+        res.json({ id, materiaId, estudianteId, modalidad, numeroSeccion });
     } catch (error) {
         console.error('Error al actualizar la sección:', error);
         res.status(500).json({ message: 'Error al actualizar la sección' });

@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import pool from '../db/database.js';
 
 export const getProfesores = async (req, res) => {
@@ -25,13 +26,21 @@ export const getProfesorById = async (req, res) => {
 };
 
 export const createProfesor = async (req, res) => {
-    const { nombre, calificacion, comentario } = req.body;
+    const { Nombre, Calificacion, Comentario } = req.body; 
+
+    // Comprobar que no sean nulos
+    if (!Nombre || Calificacion === undefined || Comentario === undefined) {
+        return res.status(400).json({ message: 'Todos los campos son requeridos' });
+    }
+
+    const MaestroID = uuidv4(); // Generar un nuevo UUID
+
     try {
         const [result] = await pool.query(
-            'INSERT INTO maestros (Nombre, Calificacion, Comentario) VALUES (?, ?, ?)', 
-            [nombre, calificacion, comentario]
+            'INSERT INTO maestros (MaestroID, Nombre, Calificacion, Comentario) VALUES (?, ?, ?, ?)', 
+            [MaestroID, Nombre, Calificacion, Comentario]
         );
-        res.status(201).json({ id: result.insertId, nombre, calificacion, comentario });
+        res.status(201).json({ id: MaestroID, Nombre, Calificacion, Comentario });
     } catch (error) {
         console.error('Error al crear el profesor:', error);
         res.status(500).json({ message: 'Error al crear el profesor' });
@@ -40,16 +49,21 @@ export const createProfesor = async (req, res) => {
 
 export const updateProfesor = async (req, res) => {
     const { id } = req.params;
-    const { nombre, calificacion, comentario } = req.body;
+    const { Nombre, Calificacion, Comentario } = req.body; 
+
+    if (!Nombre || !Calificacion || Comentario === undefined) {
+        return res.status(400).json({ message: 'Todos los campos son requeridos' });
+    }
+
     try {
         const [result] = await pool.query(
             'UPDATE maestros SET Nombre = ?, Calificacion = ?, Comentario = ? WHERE MaestroID = ?', 
-            [nombre, calificacion, comentario, id]
+            [Nombre, Calificacion, Comentario, id]
         );
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: 'Profesor no encontrado' });
         }
-        res.json({ id, nombre, calificacion, comentario });
+        res.json({ id, Nombre, Calificacion, Comentario });
     } catch (error) {
         console.error('Error al actualizar el profesor:', error);
         res.status(500).json({ message: 'Error al actualizar el profesor' });

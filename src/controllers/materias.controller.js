@@ -29,18 +29,29 @@ export const getMateriaById = async (req, res) => {
 
 // Crear una nueva materia
 export const createMateria = async (req, res) => {
+    console.log(req.body); // Agregar este log para verificar el cuerpo de la solicitud
     const { maestroID, nombre, seccion, horario, modalidad } = req.body;
 
-    // Validar que maestroID no esté vacío
     if (!maestroID) {
         return res.status(400).json({ message: 'El maestroID es requerido' });
+    }
+
+    // Validar campos requeridos
+    if (!nombre || !seccion || !horario || !modalidad) {
+        return res.status(400).json({ message: 'Todos los campos son requeridos' });
+    }
+
+    // Validar modalidad
+    const validModalities = ['Presencial', 'Virtual', 'Híbrido'];
+    if (!validModalities.includes(modalidad)) {
+        return res.status(400).json({ message: 'Modalidad no válida' });
     }
 
     try {
         const MateriaID = uuidv4(); // Generar UUID para MateriaID
         const [result] = await pool.query(
             'INSERT INTO materias (MateriaID, MaestroID, Nombre, Seccion, Horario, Modalidad) VALUES (?, ?, ?, ?, ?, ?)', 
-            [MateriaID, maestroID, nombre, seccion, horario, modalidad]
+            [MateriaID, maestroID, nombre, seccion, horario, modalidad] // Usar modalidad
         );
         res.status(201).json({ MateriaID, maestroID, nombre, seccion, horario, modalidad });
     } catch (error) {
@@ -53,6 +64,13 @@ export const createMateria = async (req, res) => {
 export const updateMateria = async (req, res) => {
     const { id } = req.params;
     const { maestroID, nombre, seccion, horario, modalidad } = req.body;
+
+    // Validar modalidad
+    const validModalities = ['Presencial', 'Virtual', 'Híbrido'];
+    if (modalidad && !validModalities.includes(modalidad)) {
+        return res.status(400).json({ message: 'Modalidad no válida' });
+    }
+
     try {
         const [result] = await pool.query(
             'UPDATE materias SET MaestroID = ?, Nombre = ?, Seccion = ?, Horario = ?, Modalidad = ? WHERE MateriaID = ?', 
