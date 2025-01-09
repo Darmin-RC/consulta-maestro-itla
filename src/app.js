@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import estudiantesRoutes from "./routes/estudiantes.routes.js";
 import carrerasRoutes from "./routes/carreras.routes.js";
 import materiasRoutes from "./routes/materias.routes.js";
@@ -12,6 +13,9 @@ const app = express();
 
 // Middleware para parsear JSON
 app.use(express.json());
+
+// Corn
+app.use(cors());
 
 // Rutas
 app.use('/estudiantes', estudiantesRoutes);
