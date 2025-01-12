@@ -3,7 +3,7 @@ import pool from '../db/database.js';
 
 export const getProfesores = async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM maestros');
+        const [rows] = await pool.query('SELECT * FROM Profesor');
         res.json(rows);
     } catch (error) {
         console.error('Error al obtener profesores:', error);
@@ -14,7 +14,7 @@ export const getProfesores = async (req, res) => {
 export const getProfesorById = async (req, res) => {
     const { id } = req.params;
     try {
-        const [rows] = await pool.query('SELECT * FROM maestros WHERE MaestroID = ?', [id]);
+        const [rows] = await pool.query('SELECT * FROM Profesor WHERE id = ?', [id]);
         if (rows.length === 0) {
             return res.status(404).json({ message: 'Profesor no encontrado' });
         }
@@ -26,21 +26,20 @@ export const getProfesorById = async (req, res) => {
 };
 
 export const createProfesor = async (req, res) => {
-    const { Nombre, Calificacion, Comentario } = req.body; 
+    const { nombre, apellido, email } = req.body;
 
-    // Comprobar que no sean nulos
-    if (!Nombre || Calificacion === undefined || Comentario === undefined) {
+    if (!nombre || !apellido || !email) {
         return res.status(400).json({ message: 'Todos los campos son requeridos' });
     }
 
-    const MaestroID = uuidv4(); // Generar un nuevo UUID
+    const id = uuidv4();
 
     try {
-        const [result] = await pool.query(
-            'INSERT INTO maestros (MaestroID, Nombre, Calificacion, Comentario) VALUES (?, ?, ?, ?)', 
-            [MaestroID, Nombre, Calificacion, Comentario]
+        await pool.query(
+            'INSERT INTO Profesor (id, nombre, apellido, email) VALUES (?, ?, ?, ?)',
+            [id, nombre, apellido, email]
         );
-        res.status(201).json({ id: MaestroID, Nombre, Calificacion, Comentario });
+        res.status(201).json({ id, nombre, apellido, email });
     } catch (error) {
         console.error('Error al crear el profesor:', error);
         res.status(500).json({ message: 'Error al crear el profesor' });
@@ -49,21 +48,21 @@ export const createProfesor = async (req, res) => {
 
 export const updateProfesor = async (req, res) => {
     const { id } = req.params;
-    const { Nombre, Calificacion, Comentario } = req.body; 
+    const { nombre, apellido, email } = req.body;
 
-    if (!Nombre || !Calificacion || Comentario === undefined) {
+    if (!nombre || !apellido || !email) {
         return res.status(400).json({ message: 'Todos los campos son requeridos' });
     }
 
     try {
         const [result] = await pool.query(
-            'UPDATE maestros SET Nombre = ?, Calificacion = ?, Comentario = ? WHERE MaestroID = ?', 
-            [Nombre, Calificacion, Comentario, id]
+            'UPDATE Profesor SET nombre = ?, apellido = ?, email = ? WHERE id = ?',
+            [nombre, apellido, email, id]
         );
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: 'Profesor no encontrado' });
         }
-        res.json({ id, Nombre, Calificacion, Comentario });
+        res.json({ id, nombre, apellido, email });
     } catch (error) {
         console.error('Error al actualizar el profesor:', error);
         res.status(500).json({ message: 'Error al actualizar el profesor' });
@@ -73,7 +72,7 @@ export const updateProfesor = async (req, res) => {
 export const deleteProfesor = async (req, res) => {
     const { id } = req.params;
     try {
-        const [result] = await pool.query('DELETE FROM maestros WHERE MaestroID = ?', [id]);
+        const [result] = await pool.query('DELETE FROM Profesor WHERE id = ?', [id]);
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: 'Profesor no encontrado' });
         }
@@ -83,3 +82,4 @@ export const deleteProfesor = async (req, res) => {
         res.status(500).json({ message: 'Error al eliminar el profesor' });
     }
 };
+

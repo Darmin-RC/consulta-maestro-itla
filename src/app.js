@@ -1,13 +1,11 @@
 import express from "express";
 import cors from "cors";
-import estudiantesRoutes from "./routes/estudiantes.routes.js";
-import carrerasRoutes from "./routes/carreras.routes.js";
-import materiasRoutes from "./routes/materias.routes.js";
-import modalidadesRoutes from "./routes/modalidades.routes.js";
 import profesoresRoutes from "./routes/profesores.routes.js";
+import materiasRoutes from "./routes/materias.routes.js";
+import carrerasRoutes from "./routes/carreras.routes.js";
+import estudiantesRoutes from "./routes/estudiantes.routes.js";
 import resenasRoutes from "./routes/resenas.routes.js";
-import seccionesRoutes from "./routes/secciones.routes.js";
-
+import especialRoutes from "./routes/especial.routes.js"
 
 const app = express();
 
@@ -18,13 +16,13 @@ app.use(express.json());
 app.use(cors());
 
 // Rutas
-app.use('/estudiantes', estudiantesRoutes);
+app.use('/profesores', profesoresRoutes);
 app.use('/carreras', carrerasRoutes);
 app.use('/materias', materiasRoutes);
-app.use('/modalidades', modalidadesRoutes);
-app.use('/profesores', profesoresRoutes);
+app.use('/estudiantes', estudiantesRoutes);
 app.use('/resenas', resenasRoutes);
-app.use('/secciones', seccionesRoutes);
+app.use('/cmitla', especialRoutes)
+
 
 // 404 no encontrado 
 app.use((req, res, next) => {

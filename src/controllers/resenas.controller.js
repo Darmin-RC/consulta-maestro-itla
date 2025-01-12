@@ -1,92 +1,59 @@
 import pool from '../db/database.js';
-import { v4 as uuidv4 } from 'uuid'; // Importar uuid para generar IDs únicos
+import { v4 as uuidv4 } from 'uuid';
 
-// Obtener todas las reseñas
-export const getResenas = async (req, res) => {
+export const crearResena = async (req, res) => {
+    const { texto, calificacion } = req.body;
+    const id = uuidv4();
     try {
-        const [rows] = await pool.query('SELECT * FROM resenas');
-        res.json(rows);
-    } catch (error) {
-        console.error('Error al obtener reseñas:', error);
-        res.status(500).json({ message: 'Error al obtener reseñas' });
-    }
-};
-
-// Obtener una reseña por ID
-export const getResenaById = async (req, res) => {
-    const { id } = req.params;
-    try {
-        const [rows] = await pool.query('SELECT * FROM resenas WHERE ResenaID = ?', [id]);
-        if (rows.length === 0) {
-            return res.status(404).json({ message: 'Reseña no encontrada' });
-        }
-        res.json(rows[0]);
-    } catch (error) {
-        console.error('Error al obtener la reseña:', error);
-        res.status(500).json({ message: 'Error al obtener la reseña' });
-    }
-};
-
-// Crear una nueva reseña
-export const createResena = async (req, res) => {
-    const { EstudianteID, MaestroID, Titulo, Descripcion, Estrellas } = req.body;
-    
-    // Generar un UUID para la ReseñaID
-    const reseñaId = uuidv4();
-
-    try {
-        const [result] = await pool.query(
-            'INSERT INTO resenas (ResenaID, EstudianteID, MaestroID, Titulo, Descripcion, Estrellas) VALUES (?, ?, ?, ?, ?, ?)', 
-            [reseñaId, EstudianteID, MaestroID, Titulo, Descripcion, Estrellas]
+        const result = await pool.query(
+            'INSERT INTO Reseña (id, texto, calificacion) VALUES (?, ?, ?)', 
+            [id, texto, calificacion]
         );
-
-        // Enviar respuesta con el contenido creado y su ID generado
-        res.status(201).json({ 
-            ReseñaID: reseñaId,
-            EstudianteID,
-            MaestroID,
-            Titulo,
-            Descripcion,
-            Estrellas
-        });
+        res.status(201).json({ id, texto, calificacion });
     } catch (error) {
-        console.error('Error al crear la reseña:', error);
-        res.status(500).json({ message: 'Error al crear la reseña' });
+        res.status(500).json({ message: 'Error al crear la reseña', error });
     }
 };
 
-// Actualizar una reseña existente
-export const updateResena = async (req, res) => {
-    const { id } = req.params;
-    const { Titulo, Descripcion, Estrellas } = req.body; // Asegúrate de que los campos coincidan con tu base de datos
-
+export const obtenerResenas = async (req, res) => {
     try {
-        const [result] = await pool.query(
-            'UPDATE resenas SET Titulo = ?, Descripcion = ?, Estrellas = ? WHERE ResenaID = ?',
-            [Titulo, Descripcion, Estrellas, id]
-        );
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Reseña no encontrada' });
-        }
-        res.json({ id, Titulo, Descripcion, Estrellas });
+        const [rows] = await pool.query('SELECT * FROM Reseña');
+        res.status(200).json(rows);
     } catch (error) {
-        console.error('Error al actualizar la reseña:', error);
-        res.status(500).json({ message: 'Error al actualizar la reseña' });
+        res.status(500).json({ message: 'Error al obtener las reseñas', error });
     }
 };
 
-// Eliminar una reseña
-export const deleteResena = async (req, res) => {
+export const obtenerResenaPorId = async (req, res) => {
     const { id } = req.params;
     try {
-        const [result] = await pool.query('DELETE FROM resenas WHERE ReseñaID = ?', [id]);
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Reseña no encontrada' });
-        }
-        res.status(204).end();
+        const [rows] = await pool.query('SELECT * FROM Reseña WHERE id = ?', [id]);
+        if (rows.length === 0) return res.status(404).json({ message: 'Reseña no encontrada' });
+        res.status(200).json(rows[0]);
     } catch (error) {
-        console.error('Error al eliminar la reseña:', error);
-        res.status(500).json({ message: 'Error al eliminar la reseña' });
+        res.status(500).json({ message: 'Error al obtener el reseña', error });
+    }
+};
+
+export const actualizarResena = async (req, res) => {
+    const { id } = req.params;
+    const { texto, calificacion } = req.body;
+    try {
+        const result = await pool.query('UPDATE Reseña SET texto = ?, calificacion = ? WHERE id = ?', [texto, calificacion, id]);
+        if (result.affectedRows === 0) return res.status(404).json({ message: 'Reseña no encontrada' });
+        res.status(200).json({ id, texto, calificacion });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al actualizar la reseña', error });
+    }
+};
+
+export const eliminarResena = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = await pool.query('DELETE FROM Reseña WHERE id = ?', [id]);
+        if (result.affectedRows === 0) return res.status(404).json({ message: 'Reseña no encontrada' });
+        res.status(204).send();
+    } catch (error) {
+        res.status(500).json({ message: 'Error al eliminar la reseña', error });
     }
 };

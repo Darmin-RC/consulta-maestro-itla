@@ -1,74 +1,56 @@
-import { v4 as uuidv4 } from 'uuid';
 import pool from '../db/database.js';
+import { v4 as uuidv4 } from 'uuid';
 
-// Obtener todas las carreras
-export const getCarreras = async (req, res) => {
+export const crearCarrera = async (req, res) => {
+    const { nombre } = req.body;
+    const id = uuidv4();
     try {
-        const [rows] = await pool.query('SELECT * FROM carreras');
-        res.json(rows);
+        const result = await pool.query('INSERT INTO Carrera (id, nombre) VALUES (?, ?)', [id, nombre]);
+        res.status(201).json({ id, nombre});
     } catch (error) {
-        console.error('Error al obtener carreras:', error);
-        res.status(500).json({ message: 'Error al obtener carreras' });
+        res.status(500).json({ message: 'Error al crear la carrera', error });
     }
 };
 
-// Obtener una carrera por ID
-export const getCarreraById = async (req, res) => {
+export const obtenerCarreras = async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM Carrera');
+        res.status(200).json(rows);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener las carrera', error });
+    }
+};
+
+export const obtenerCarreraPorId = async (req, res) => {
     const { id } = req.params;
     try {
-        const [rows] = await pool.query('SELECT * FROM carreras WHERE CarreraID = ?', [id]);
-        if (rows.length === 0) {
-            return res.status(404).json({ message: 'Carrera no encontrada' });
-        }
-        res.json(rows[0]);
+        const [rows] = await pool.query('SELECT * FROM Carrera WHERE id = ?', [id]);
+        if (rows.length === 0) return res.status(404).json({ message: 'Carrera no encontrada' });
+        res.status(200).json(rows[0]);
     } catch (error) {
-        console.error('Error al obtener la carrera:', error);
-        res.status(500).json({ message: 'Error al obtener la carrera' });
+        res.status(500).json({ message: 'Error al obtener la carrera', error });
     }
 };
 
-// Crear una nueva carrera
-export const createCarrera = async (req, res) => {
-    const { nombre } = req.body;
-    try {
-        const CarreraID = uuidv4();
-
-        await pool.query('INSERT INTO carreras (CarreraID, Nombre) VALUES (?, ?)', [CarreraID, nombre]);
-
-        res.status(201).json({ id: CarreraID, nombre });
-    } catch (error) {
-        console.error('Error al crear la carrera:', error);
-        res.status(500).json({ message: 'Error al crear la carrera' });
-    }
-};
-
-// Actualizar una carrera por ID
-export const updateCarrera = async (req, res) => {
+export const actualizarCarrera = async (req, res) => {
     const { id } = req.params;
     const { nombre } = req.body;
     try {
-        const [result] = await pool.query('UPDATE carreras SET Nombre = ? WHERE CarreraID = ?', [nombre, id]);
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Carrera no encontrada' });
-        }
-        res.json({ id, nombre });
+        const result = await pool.query('UPDATE Carrera SET nombre = ? WHERE id = ?', [nombre, id]);
+        if (result.affectedRows === 0) return res.status(404).json({ message: 'Carrera no encontrada' });
+        res.status(200).json({ id, nombre });
     } catch (error) {
-        console.error('Error al actualizar la carrera:', error);
-        res.status(500).json({ message: 'Error al actualizar la carrera' });
+        res.status(500).json({ message: 'Error al actualizar la carrera', error });
     }
 };
 
-// Eliminar una carrera por ID
-export const deleteCarrera = async (req, res) => {
+export const eliminarCarrera = async (req, res) => {
     const { id } = req.params;
     try {
-        const [result] = await pool.query('DELETE FROM carreras WHERE CarreraID = ?', [id]);
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Carrera no encontrada' });
-        }
-        res.status(204).end(); // No content
+        const result = await pool.query('DELETE FROM Carrera WHERE id = ?', [id]);
+        if (result.affectedRows === 0) return res.status(404).json({ message: 'Carrera no encontrada' });
+        res.status(204).send();
     } catch (error) {
-        console.error('Error al eliminar la carrera:', error);
-        res.status(500).json({ message: 'Error al eliminar la carrera' });
+        res.status(500).json({ message: 'Error al eliminar la carrera', error });
     }
 };

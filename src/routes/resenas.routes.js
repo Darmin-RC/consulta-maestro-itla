@@ -1,20 +1,14 @@
-// src/routes/resenas.routes.js
-import { Router } from 'express';
+import {Router} from 'express'
 import {
-    getResenas,
-    getResenaById,
-    createResena,
-    updateResena,
-    deleteResena
-} from '../controllers/resenas.controller.js';
+    crearResena, actualizarResena, eliminarResena, obtenerResenas, obtenerResenaPorId
+} from '../controllers/resenas.controller.js'
 
-const router = Router();
+const router = Router()
 
-// Rutas para reseñas
-router.get('/', getResenas);
-router.get('/:id', getResenaById);
-router.post('/', createResena);
-router.put('/:id', updateResena);
-router.delete('/:id', deleteResena);
+router.get('/', obtenerResenas)
+router.get('/:id', obtenerResenaPorId)
+router.post('/', crearResena)
+router.put('/:id', actualizarResena)
+router.delete('/:id', eliminarResena)
 
-export default router;
+export default router

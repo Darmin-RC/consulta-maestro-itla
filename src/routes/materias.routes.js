@@ -1,20 +1,18 @@
-// src/routes/materias.routes.js
-import { Router } from 'express';
+import { Router } from "express";
 import {
-    getMaterias,
-    getMateriaById,
-    createMateria,
-    updateMateria,
-    deleteMateria
-} from '../controllers/materias.controller.js';
+    obtenerMaterias,
+    actualizarMateria,
+    eliminarMateria,
+    crearMateria,
+    obtenerMateriaPorId
+} from "../controllers/materias.controller.js";
 
 const router = Router();
 
-// Rutas para materias
-router.get('/', getMaterias);
-router.get('/:id', getMateriaById);
-router.post('/', createMateria);
-router.put('/:id', updateMateria);
-router.delete('/:id', deleteMateria);
+router.get('/', obtenerMaterias);
+router.get('/:id', obtenerMateriaPorId);
+router.post('/', crearMateria);
+router.put('/:id', actualizarMateria);
+router.delete('/:id', eliminarMateria);
 
 export default router;
